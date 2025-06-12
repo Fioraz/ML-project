@@ -1,1 +1,1 @@
-# ML-project
+This is a machine learning model to predict salaries based on features such as years of experience, job title, education level, and location using multiple machine learning approaches (PyTorch, and TensorFlow). In this project I used Pandas for data loading and preprocessing, NumPy for numerical operations, and both PyTorch and TensorFlow to create and compare neural network models.
