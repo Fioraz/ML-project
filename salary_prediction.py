@@ -6,6 +6,7 @@ import torch.nn as nn
 import torch.optim as optim
 import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
 
 
 ### Load and preprocess data ###
@@ -23,12 +24,15 @@ for col in df.select_dtypes(include=['float64', 'int64']).columns:
 
 X = df[['YearsExperience']].values
 y = df['Salary'].values
-
-# Convert to NumPy arrays for compatibility
-# X = np.array(X)
-# y = np.array(y)
-
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Scale only the training data
+scaler_X = StandardScaler()
+scaler_y = StandardScaler()
+X_train = scaler_X.fit_transform(X_train)
+y_train = scaler_y.fit_transform(y_train.reshape(-1, 1))
+X_test = scaler_X.transform(X_test)
+y_test = scaler_y.transform(y_test.reshape(-1, 1))
 
 
 ### TensorFlow model ###
@@ -55,7 +59,7 @@ y_train_torch = torch.FloatTensor(y_train).view(-1, 1)
 X_test_torch = torch.FloatTensor(X_test)
 y_test_torch = torch.FloatTensor(y_test).view(-1, 1)
 
-# Define a simple neural network
+# Defining a simple neural network
 class SalaryModel(nn.Module):
     def __init__(self):
         super(SalaryModel, self).__init__()
@@ -89,15 +93,17 @@ with torch.no_grad():
 ### Visualize results ###
 
 # Predict with TensorFlow
-y_pred_tf = model_tf.predict(X_test)
+y_pred_tf = scaler_y.inverse_transform(model_tf.predict(X_test))
+
 
 # Predict with PyTorch
 with torch.no_grad():
     y_pred_pt = model_pt(X_test_torch)
+y_pred_pt = scaler_y.inverse_transform(y_pred_pt.numpy())
 
 plt.scatter(X_test, y_test, color='red', label='Actual')
 plt.scatter(X_test, y_pred_tf, color='blue', label='TensorFlow')
-plt.scatter(X_test, y_pred_pt.numpy(), color='green', label='PyTorch')
+plt.scatter(X_test, y_pred_pt, color='green', label='PyTorch')
 plt.xlabel('Years of Experience')
 plt.ylabel('Salary')
 plt.legend()
