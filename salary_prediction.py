@@ -101,9 +101,13 @@ with torch.no_grad():
     y_pred_pt = model_pt(X_test_torch)
 y_pred_pt = scaler_y.inverse_transform(y_pred_pt.numpy())
 
-plt.scatter(X_test, y_test, color='red', label='Actual')
-plt.scatter(X_test, y_pred_tf, color='blue', label='TensorFlow')
-plt.scatter(X_test, y_pred_pt, color='green', label='PyTorch')
+# Inverse-transform for plotting
+X_test_original = scaler_X.inverse_transform(X_test)
+y_test_original = scaler_y.inverse_transform(y_test)
+
+plt.scatter(X_test_original, y_test_original, color='red', label='Actual')
+plt.scatter(X_test_original, y_pred_tf, color='blue', label='TensorFlow')
+plt.scatter(X_test_original, y_pred_pt, color='green', label='PyTorch')
 plt.xlabel('Years of Experience')
 plt.ylabel('Salary')
 plt.legend()
